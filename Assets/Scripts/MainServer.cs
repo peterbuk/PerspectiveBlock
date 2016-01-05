@@ -12,40 +12,48 @@ public class MainServer : MonoBehaviour {
     NetworkClient client;
 
     public Text debugText;
+    int messageCount = 0;
 
     // Use this for initialization
     void Start ()
     {
 
         NetworkServer.Listen(PORT);
-        Debug.Log("Listening");
-        debugText.text += "Listening";
+        debugText.text = "Listening at " + Network.player.ipAddress;
 
         NetworkServer.RegisterHandler(MsgType.Connect, OnConnected);
         NetworkServer.RegisterHandler(MsgType.Disconnect, OnDisconnected);
         NetworkServer.RegisterHandler(LOCATION_MSG, OnLocation);
-
-        debugText.text = Network.player.ipAddress;
     }
 
     public void OnConnected(NetworkMessage netMsg)
     {
-        Debug.Log("Client has connected");
-        debugText.text += "Client has connected";
+        NetworkConnection conn = netMsg.conn;
+        int id = conn.connectionId;
+
+        debugText.text += "CLIENT#" + id + " has connected";
     }
 
     public void OnDisconnected(NetworkMessage netMsg)
     {
-        Debug.Log("Client has disconnected");
-        debugText.text += "Client has disconnected";
+        NetworkConnection conn = netMsg.conn;
+        int id = conn.connectionId;
+
+        debugText.text += "CLIENT#" + id + " has disconnected";
     }
 
 
     public void OnLocation(NetworkMessage netMsg)
     {
+        NetworkConnection conn = netMsg.conn;
+        int id = conn.connectionId;
+
         var msg = netMsg.ReadMessage<StringMessage>();
-        Debug.Log("msg: " + msg.value);
-        debugText.text += msg.value + "\n";
+        debugText.text += "id#" + id + " msg: " + msg.value + "\n";
+
+        messageCount++;
+        if (messageCount > 20)
+            debugText.text = "";
     }
 	
 	// Update is called once per frame

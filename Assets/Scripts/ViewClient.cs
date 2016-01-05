@@ -9,7 +9,7 @@ public class ViewClient : MonoBehaviour {
     const int PORT = 12238;
     const short LOCATION_MSG = 55;
 
-    string ip = "172.17.14.89";
+    string ip = "192.168.139.110";
 
     NetworkClient client;
     bool connected = false;
