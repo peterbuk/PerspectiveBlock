@@ -15,6 +15,8 @@ public class ViewLocation : MonoBehaviour {
 
     }
 
+// THIS SCRIPT IS OBSOLUTE?
+
     // Update is called once per frame
     void Update()
     {
@@ -23,12 +25,12 @@ public class ViewLocation : MonoBehaviour {
         {
             // switch it off
             bgRenderer.enabled = false;
-        }*/
+        }
 
         debugText.text = "Camera Location: " + ARCamera.transform.position.ToString() + "\n" +
             "Camera Rotation: " + ARCamera.transform.rotation.ToString() +
             "\nDistance from target: " +
             Vector3.Distance(target.transform.position, ARCamera.transform.position).ToString() +
-            "\nTarget location: " + target.transform.position.ToString();
+            "\nTarget location: " + target.transform.position.ToString();*/
     }
 }

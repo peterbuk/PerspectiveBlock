@@ -7,7 +7,8 @@ using UnityEngine.UI;
 public class ViewClient : MonoBehaviour {
 
     const int PORT = 12238;
-    const short LOCATION_MSG = 55;
+    const short INTRODUCTION_MSG = 60;
+    const short LOCATION_MSG = 61;
 
     string ip = "192.168.139.110";
 
@@ -24,7 +25,7 @@ public class ViewClient : MonoBehaviour {
     void Start ()
     {
         client = new NetworkClient();
-        client.RegisterHandler(LOCATION_MSG, LocationReply);
+        client.RegisterHandler(LOCATION_MSG, OnLocationReceive);
         client.RegisterHandler(MsgType.Connect, OnConnected);
         client.RegisterHandler(MsgType.Error, OnError);
 
@@ -40,6 +41,7 @@ public class ViewClient : MonoBehaviour {
     public void OnConnected(NetworkMessage netMsg)
     {
         debugText.text = "Connected to server";
+        client.Send(INTRODUCTION_MSG, new StringMessage("VIEWCLIENT"));
         connected = true;
     }
 
@@ -48,28 +50,21 @@ public class ViewClient : MonoBehaviour {
         debugText.text = "error";
     }
 
-    public void LocationReply(NetworkMessage netMsg)
+    /*
+    *   Receive location broadcast from server
+    */
+    public void OnLocationReceive(NetworkMessage netMsg)
     {
+        int id = netMsg.conn.connectionId;
         var msg = netMsg.ReadMessage<StringMessage>();
-        debugText.text = "reply" + msg.value;
+        debugText.text = "[location] " + id + ": " + msg.value + "\n";
     }
 
 
-    float timer = 1.0f;
     // Update is called once per frame
     void Update()
     {
-        if (connected)
-        {
-            timer -= Time.deltaTime;
-            if (timer < 0)
-            {
-                float distance = Vector3.Distance(target.transform.position, ARCamera.transform.position);
-                client.Send(LOCATION_MSG, new StringMessage(distance.ToString()));
-                timer = 3;
-            }
 
-        }
 	}
 
     public void Doot()
