@@ -237,4 +237,20 @@
             <resampledTextureWidth>640</resampledTextureWidth>
         </osx>
     </webcam>
+    <webcam deviceName="Live! Cam Notebook Ultra (VC0130) #2">
+        <windows>
+            <!-- size of the web cam texture requested from Unity -->
+            <requestedTextureWidth>640</requestedTextureWidth>
+            <requestedTextureHeight>480</requestedTextureHeight>
+            <!-- size of the texture Unity's web cam texture will be rescaled to -->
+            <resampledTextureWidth>640</resampledTextureWidth>
+        </windows>
+        <osx>
+            <!-- size of the web cam texture requested from Unity -->
+            <requestedTextureWidth>640</requestedTextureWidth>
+            <requestedTextureHeight>480</requestedTextureHeight>
+            <!-- size of the texture Unity's web cam texture will be rescaled to -->
+            <resampledTextureWidth>640</resampledTextureWidth>
+        </osx>
+    </webcam>
 </profiles>

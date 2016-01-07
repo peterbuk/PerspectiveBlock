@@ -20,7 +20,7 @@ public class MainServer : MonoBehaviour {
     {
 
         NetworkServer.Listen(PORT);
-        debugText.text = "Listening at " + Network.player.ipAddress + "\n";
+        GuiTextDebug.debug("Listening at " + Network.player.ipAddress);
 
         NetworkServer.RegisterHandler(MsgType.Connect, OnConnected);
         NetworkServer.RegisterHandler(MsgType.Disconnect, OnDisconnected);
@@ -31,13 +31,13 @@ public class MainServer : MonoBehaviour {
     public void OnConnected(NetworkMessage netMsg)
     {
         int id = netMsg.conn.connectionId;
-        debugText.text += "[connect] CLIENT#" + id + " has connected\n";
+        GuiTextDebug.debug("[connect] CLIENT#" + id + " has connected");
     }
 
     public void OnDisconnected(NetworkMessage netMsg)
     {
         int id = netMsg.conn.connectionId;
-        debugText.text += "[disconnect] CLIENT#" + id + " has disconnected\n";
+        GuiTextDebug.debug("[disconnect] CLIENT#" + id + " has disconnected");
     }
 
     /*
@@ -52,11 +52,11 @@ public class MainServer : MonoBehaviour {
         if (msg.value.Contains("VIEWCLIENT"))
         {
             viewClients.Add(id);
-            debugText.text += "[join] VIEW CLIENT#" + id + "has joined!\n";
+            GuiTextDebug.debug("[join] VIEW CLIENT#" + id + "has joined!");
         }
         else if (msg.value.Contains("BLOCKCLIENT"))
         {
-            debugText.text += "[join] BLOCK CLIENT#" + id + "has joined!\n";
+            GuiTextDebug.debug("[join] BLOCK CLIENT#" + id + "has joined!");
         }
     }
 
@@ -68,7 +68,7 @@ public class MainServer : MonoBehaviour {
     {
         int id = netMsg.conn.connectionId;
         StringMessage msg = netMsg.ReadMessage<StringMessage>();
-        debugText.text += "[location] " + id + ": " + msg.value + "\n";
+        GuiTextDebug.debug("[location] " + id + ": " + msg.value);
 
         // broadcast to all ViewClients
         foreach (int viewClient in viewClients)
@@ -76,11 +76,9 @@ public class MainServer : MonoBehaviour {
             NetworkServer.SendToClient(viewClient, LOCATION_MSG, msg);
         }
     }
-	
 
 	// Update is called once per frame
 	void Update ()
     {
-       
 	}
 }

@@ -12,6 +12,7 @@ public class BlockLocationUpdater : MonoBehaviour
     const short LOCATION_MSG = 61;
 
     string ip = "192.168.139.110";
+    float timer = 1.0f;
 
     NetworkClient client;
     bool connected = false;
@@ -22,13 +23,13 @@ public class BlockLocationUpdater : MonoBehaviour
 
     public GameObject target;
     public GameObject ARCamera;
-    float timer = 1.0f;
 
     // Use this for initialization
     void Start ()
     {
         client = new NetworkClient();
         client.RegisterHandler(MsgType.Connect, OnConnected);
+        client.RegisterHandler(MsgType.Disconnect, OnDisconnected);
         client.RegisterHandler(MsgType.Error, OnError);
 
         ipAddress.text = ip;
@@ -49,16 +50,22 @@ public class BlockLocationUpdater : MonoBehaviour
             "\nTarget location: " + targetLocation.ToString();
 
         if (connected)
-        {
+        {   // send location updates
+            // TODO: optimize message to include self-id
             timer -= Time.deltaTime;
-            //if (timer < 0)
-           // {
+            if (timer < 0)
+            {
                 client.Send(LOCATION_MSG, new StringMessage(
-                        cameraLocation.ToString() + " " +
-                        distance.ToString()
-                    ));
-                timer = 0.1f;
-            //}
+                      cameraLocation.x + "|" +
+                      cameraLocation.y + "|" +
+                      cameraLocation.z + "|" +
+                      cameraRotation.x + "|" +
+                      cameraRotation.y + "|" +
+                      cameraRotation.z + "|" +
+                      cameraRotation.w
+                  ));
+                timer = 1.0f;
+            }
         }
 
     }
@@ -74,18 +81,22 @@ public class BlockLocationUpdater : MonoBehaviour
     *************************************************************************************
     *************************************************************************************/
 
-    #region Network Events
-
+#region Network Handlers
     public void OnConnected(NetworkMessage netMsg)
     {
         networkText.text = "Connected to server";
         client.Send(INTRODUCTION_MSG, new StringMessage("BLOCKCLIENT"));
         connected = true;
     }
+    public void OnDisconnected(NetworkMessage netMsg)
+    {
+        networkText.text = "Disconnected!";
+        connected = false;
+    }
     public void OnError(NetworkMessage netMsg)
     {
         networkText.text = "error";
     }
 
-    #endregion
+#endregion
 }
