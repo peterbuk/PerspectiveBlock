@@ -14,6 +14,7 @@ public class MainServer : MonoBehaviour {
     ArrayList viewClients = new ArrayList();
 
     public Text debugText;
+    bool verboseDebug = true;
 
     // Use this for initialization
     void Start ()
@@ -68,7 +69,9 @@ public class MainServer : MonoBehaviour {
     {
         int id = netMsg.conn.connectionId;
         StringMessage msg = netMsg.ReadMessage<StringMessage>();
-        GuiTextDebug.debug("[location] " + id + ": " + msg.value);
+
+        if (verboseDebug)
+            GuiTextDebug.debug("[location] " + id + ": " + msg.value);
 
         // broadcast to all ViewClients
         foreach (int viewClient in viewClients)
@@ -81,4 +84,12 @@ public class MainServer : MonoBehaviour {
 	void Update ()
     {
 	}
+
+    public void ToggleVerbose()
+    {
+        if (verboseDebug)
+            verboseDebug = false;
+        else
+            verboseDebug = true;
+    }
 }

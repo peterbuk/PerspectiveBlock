@@ -43,7 +43,6 @@ public class BlockLocationUpdater : MonoBehaviour
         Quaternion cameraRotation = ARCamera.transform.rotation;
         float distance = Vector3.Distance(targetLocation, cameraLocation);
 
-
         cameraText.text = "Camera Location: " + cameraLocation.ToString() + "\n" +
             "Camera Rotation: " + cameraRotation.ToString() +
             "\nDistance from target: " + distance +
@@ -53,8 +52,8 @@ public class BlockLocationUpdater : MonoBehaviour
         {   // send location updates
             // TODO: optimize message to include self-id
             timer -= Time.deltaTime;
-            if (timer < 0)
-            {
+            //if (timer < 0)
+            //{
                 client.Send(LOCATION_MSG, new StringMessage(
                       cameraLocation.x + "|" +
                       cameraLocation.y + "|" +
@@ -65,7 +64,7 @@ public class BlockLocationUpdater : MonoBehaviour
                       cameraRotation.w
                   ));
                 timer = 1.0f;
-            }
+            //}
         }
 
     }
@@ -91,6 +90,8 @@ public class BlockLocationUpdater : MonoBehaviour
     public void OnDisconnected(NetworkMessage netMsg)
     {
         networkText.text = "Disconnected!";
+        //???netMsg.ReadMessage<ErrorMessage>();
+
         connected = false;
     }
     public void OnError(NetworkMessage netMsg)
