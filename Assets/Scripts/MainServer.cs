@@ -9,6 +9,7 @@ public class MainServer : MonoBehaviour {
     const int PORT = 12238;
     const short INTRODUCTION_MSG = 60;
     const short LOCATION_MSG = 61;
+    const short FRAME_MSG = 62;
 
     NetworkClient client;
     ArrayList viewClients = new ArrayList();
@@ -19,7 +20,9 @@ public class MainServer : MonoBehaviour {
     // Use this for initialization
     void Start ()
     {
-
+        ConnectionConfig config = new ConnectionConfig();
+        config.AddChannel(QosType.UnreliableFragmented);
+        NetworkServer.Configure(config, 5);
         NetworkServer.Listen(PORT);
         GuiTextDebug.debug("Listening at " + Network.player.ipAddress);
 
@@ -27,6 +30,7 @@ public class MainServer : MonoBehaviour {
         NetworkServer.RegisterHandler(MsgType.Disconnect, OnDisconnected);
         NetworkServer.RegisterHandler(INTRODUCTION_MSG, OnJoin);
         NetworkServer.RegisterHandler(LOCATION_MSG, OnLocation);
+        NetworkServer.RegisterHandler(FRAME_MSG, OnFrame);
     }
 
     public void OnConnected(NetworkMessage netMsg)
@@ -77,6 +81,21 @@ public class MainServer : MonoBehaviour {
         foreach (int viewClient in viewClients)
         {
             NetworkServer.SendToClient(viewClient, LOCATION_MSG, msg);
+        }
+    }
+
+    public void OnFrame(NetworkMessage netMsg)
+    {
+        int id = netMsg.conn.connectionId;
+        FrameMessage msg = netMsg.ReadMessage<FrameMessage>();
+
+        if (verboseDebug)
+            GuiTextDebug.debug("[frame] " + id + ": " + msg.frame.Length);
+
+        // broadcast to all ViewClients
+        foreach (int viewClient in viewClients)
+        {
+            NetworkServer.SendToClient(viewClient, FRAME_MSG, msg);
         }
     }
 

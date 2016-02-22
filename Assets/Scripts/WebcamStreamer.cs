@@ -2,6 +2,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using Vuforia;
+/*
+Kevin Ta
+*/
+
 
 [RequireComponent(typeof (NetworkView))]
 public class WebcamStreamer : MonoBehaviour {
@@ -31,9 +35,6 @@ public class WebcamStreamer : MonoBehaviour {
 	[Tooltip("The camera to update the transform of. Assume this camera has no network view. Server will use this as a host object to observe, clients will observe the transform.")]
 	public GameObject cameraUpdate;
 	public NetworkStateSynchronization stateSynchronization = NetworkStateSynchronization.Unreliable;
-
-
-	private Camera watchingCamera;
 
 
 	private Texture2D planeTexture;
@@ -167,10 +168,10 @@ public class WebcamStreamer : MonoBehaviour {
 					//image.CopyToTexture(planeTexture);
 					planeTexture.LoadRawTextureData(image.Pixels);
 					DistributeVideoFrame(planeTexture.EncodeToJPG(clientCompressQuality));
-					//DistributeVideoFrame(image.Pixels);// (clientCompressQuality));
+                    //DistributeVideoFrame(image.Pixels);// (clientCompressQuality));
 
-
-					if (showWebcamTexture == true){
+                    // CLIENT
+                    if (showWebcamTexture == true){
 						planeTexture.Apply ();
 					}
 
@@ -185,15 +186,8 @@ public class WebcamStreamer : MonoBehaviour {
 					m_LogInfo = false;
 					*/
 				}
-				
-				
-				
 			}
-			
 		}
-
-			
-
 	}
 
 	void InitializeTextureCameraCapture(){
@@ -206,13 +200,10 @@ public class WebcamStreamer : MonoBehaviour {
 		}
 		else
 		{
-			
-
 			InitializeWebcamTexture(image.Width, image.Height, webcamTextureFormat);
 			initialized = true;
 			Debug.Log ("Camera resolution: (" + image.Width + "," + image.Height + ")");
 
-			
 			/*
 			string s = m_PixelFormat + " image: \n";
 			s += "  size: " + image.Width + "x" + image.Height + "\n";
@@ -231,15 +222,12 @@ public class WebcamStreamer : MonoBehaviour {
 
 		if (isServer == true) {
 
-
 		} else {
 			//is client, await connection
 			if (initialized == true){
 
 			}
 		}
-
-
 	}
 
 
@@ -258,15 +246,14 @@ public class WebcamStreamer : MonoBehaviour {
 			}
 		}
 
+        //CLIENT SIDE
 		if (displayImage != null) {
 			displayImage.sprite = Sprite.Create (planeTexture, new Rect (0, 0, texWidth, texHeight), new Vector2 (0.5f, 0.5f));
 		}
 		planeTexture.Apply ();
-
 	}
 
 	
-
 
 	void DistributeVideoFrame(byte[] frame){
 
@@ -283,7 +270,6 @@ public class WebcamStreamer : MonoBehaviour {
 		if (initialized == false) {
 			return;
 		}
-
 
 
 		int millis = System.DateTime.Now.Millisecond;

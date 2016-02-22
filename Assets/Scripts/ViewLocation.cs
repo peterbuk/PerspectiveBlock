@@ -19,19 +19,30 @@ public class ViewLocation : MonoBehaviour {
         line = cameraPointer.GetComponent<LineRenderer>();
     }
 
+    public float x = 0;
+    public float y = 0;
+    public float z = 0;
 
+
+
+    /*
+    *   Update the camera subtle cueing indicator
+    *   TODO: Transform into spotlight
+    */
     public void UpdatePointer(Vector3 position, Quaternion rotation)
     {
         cameraPointer.SetActive(true);
         cameraPointer.transform.position = position;
         cameraPointer.transform.rotation = rotation;
-        cameraPointer.transform.Rotate(-90, 0, 0);
+        cameraPointer.transform.Rotate(0, 90, 270);
+        cameraPointer.transform.Translate(x, y, z);
 
         cameraText.text = "Pointer: " + position.ToString() +
-                          "\nRotate:" + rotation.ToString();
+                          "\nRotate:" + rotation.ToString() +
+                          "\n"+x +"|"+y+"|"+ z;
 
+        // does something with raycasting that doesn't work yet???
         RaycastHit ray;
-
         Physics.Raycast(new Ray(cameraPointer.transform.position,
                                         GetForwardVector(cameraPointer.transform.rotation)), 
                                         out ray);
@@ -44,6 +55,28 @@ public class ViewLocation : MonoBehaviour {
         return new Vector3(2 * (q.x * q.z + q.w * q.y),
                            2 * (q.y * q.x - q.w * q.x),
                            1 - 2 * (q.x * q.x + q.y * q.y));
+    }
+
+    public void incX()
+    {
+        y++;
+    }
+
+    public void incY()
+    {
+        y--;
+    }
+
+    public void incZ()
+    {
+        if (z == 270)
+        {
+            z = 0;
+        }
+        else
+        {
+            z += 90;
+        }
     }
 
 

@@ -5,7 +5,8 @@ using UnityEngine.Networking.NetworkSystem;
 using UnityEngine.UI;
 using System;
 
-public class ViewClient : MonoBehaviour {
+public class TestClientBasic : MonoBehaviour {
+
 
     const int PORT = 12238;
     const short INTRODUCTION_MSG = 60;
@@ -20,17 +21,18 @@ public class ViewClient : MonoBehaviour {
     public Text debugText;
     public InputField ipAddress;
 
-    public GameObject target;
-    public GameObject ARCamera;
     public VideoViewer viewer;
 
-    private ViewLocation location;
 
 
     // Use this for initialization
-    void Start ()
+    void Start()
     {
+        ConnectionConfig config = new ConnectionConfig();
+        config.AddChannel(QosType.UnreliableFragmented);
+
         client = new NetworkClient();
+        client.Configure(config, 2);
         client.RegisterHandler(LOCATION_MSG, OnLocationReceive);
         client.RegisterHandler(FRAME_MSG, OnFrame);
 
@@ -39,11 +41,10 @@ public class ViewClient : MonoBehaviour {
         client.RegisterHandler(MsgType.Disconnect, OnDisconnect);
 
         ipAddress.text = ip;
-        location = ARCamera.GetComponent<ViewLocation>();
     }
 
 
-#region Handlers
+    #region Handlers
     public void OnDisconnect(NetworkMessage netMsg)
     {
         debugText.text = "Disconnected! :(";
@@ -59,7 +60,7 @@ public class ViewClient : MonoBehaviour {
     {
         debugText.text = "error";
     }
-#endregion
+    #endregion
 
     /*
     *   Connect to server.
@@ -80,34 +81,9 @@ public class ViewClient : MonoBehaviour {
         var msg = netMsg.ReadMessage<StringMessage>();
         debugText.text = "[location] " + id + ": " + msg.value + "\n";
 
-        Vector3 position = ParsePosition(msg.value);
-        Quaternion rotation = ParseRotation(msg.value);
-
-        // render cameralocation
-        location.UpdatePointer(position, rotation);
     }
 
 
-    // read a Vector3 in the form of x|y|z
-    private Vector3 ParsePosition(string msg)
-    {
-        string[] sub = msg.Split('|');
-        return new Vector3(float.Parse(sub[0]),
-            float.Parse(sub[1]),
-            float.Parse(sub[2]));
-    }
-    private Quaternion ParseRotation(string msg)
-    {
-        string[] sub = msg.Split('|');
-
-        return new Quaternion(float.Parse(sub[3]),
-            float.Parse(sub[4]),
-            float.Parse(sub[5]),
-            float.Parse(sub[6]));
-    }
-
-
-    // receive frame message
     public void OnFrame(NetworkMessage netMsg)
     {
         int id = netMsg.conn.connectionId;
@@ -117,9 +93,10 @@ public class ViewClient : MonoBehaviour {
     }
 
 
-    public void Doot()
+    // Update is called once per frame
+    void Update()
     {
-        if (connected)
-            client.Send(LOCATION_MSG, new StringMessage("Dootdoot"));
+
     }
+
 }

@@ -10,12 +10,13 @@ public class BlockLocationUpdater : MonoBehaviour
     const int PORT = 12238;
     const short INTRODUCTION_MSG = 60;
     const short LOCATION_MSG = 61;
+    const short FRAME_MSG = 62;
 
-    string ip = "192.168.139.110";
+    string ip = "192.168.1.2";
     float timer = 1.0f;
 
     NetworkClient client;
-    bool connected = false;
+    public bool connected = false;
 
     public Text networkText;
     public Text cameraText;
@@ -27,7 +28,12 @@ public class BlockLocationUpdater : MonoBehaviour
     // Use this for initialization
     void Start ()
     {
+        ConnectionConfig config = new ConnectionConfig();
+        config.AddChannel(QosType.UnreliableFragmented);
+
+
         client = new NetworkClient();
+        client.Configure(config, 2);
         client.RegisterHandler(MsgType.Connect, OnConnected);
         client.RegisterHandler(MsgType.Disconnect, OnDisconnected);
         client.RegisterHandler(MsgType.Error, OnError);
@@ -53,7 +59,7 @@ public class BlockLocationUpdater : MonoBehaviour
             // TODO: optimize message to include self-id
             timer -= Time.deltaTime;
             //if (timer < 0)
-            //{
+            
                 client.Send(LOCATION_MSG, new StringMessage(
                       cameraLocation.x + "|" +
                       cameraLocation.y + "|" +
@@ -64,7 +70,7 @@ public class BlockLocationUpdater : MonoBehaviour
                       cameraRotation.w
                   ));
                 timer = 1.0f;
-            //}
+            
         }
 
     }
@@ -73,7 +79,12 @@ public class BlockLocationUpdater : MonoBehaviour
     {
         networkText.text = "Connecting to" + ipAddress.text;
         client.Connect(ipAddress.text, PORT);
+    }
 
+    public void DistributeVideoFrame(byte[] frame)
+    {
+        networkText.text = "framesize: " + frame.Length;
+        client.Send(FRAME_MSG, new FrameMessage(frame));
     }
 
     /*************************************************************************************
