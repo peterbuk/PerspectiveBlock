@@ -6,8 +6,8 @@ public class VideoViewer : MonoBehaviour {
     public UnityEngine.UI.Image displayImage;
 
     private Texture2D planeTexture;
-    private int texWidth = 240;
-    private int texHeight = 120;
+    private int texWidth = 1280;
+    private int texHeight = 720;
 
     bool initialized = false;
 
@@ -18,21 +18,23 @@ public class VideoViewer : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	}
+        if (!initialized)
+        {
+            InitializeTexture();
+        }
+    }
 
     public void LoadFrame(byte[] frame)
     {
-        if (!initialized)
-            InitializeTexture();
 
         //Vuforia.Image.PIXEL_FORMAT imageFormat = Vuforia.Image.PIXEL_FORMAT.RGB565;
 
+        //planeTexture.LoadRawTextureData(frame);
         planeTexture.LoadImage(frame);
     }
 
     void InitializeTexture()
     {
-
         planeTexture = new Texture2D(texWidth, texHeight, TextureFormat.RGB565, false);
 
         for (int i = 0; i < texHeight; i++)
