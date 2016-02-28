@@ -108,11 +108,11 @@ public class VideoStreamer : MonoBehaviour {
                 }
                 else
                 {
-                    //image.CopyToTexture(planeTexture);
+                    
                     planeTexture.LoadRawTextureData(image.Pixels);
                     blockClient.DistributeVideoFrame(planeTexture.EncodeToJPG(clientCompressQuality));
-                    //DistributeVideoFrame(image.Pixels);// (clientCompressQuality));
-                    debugText.text += webcamTextureFormat;
+                    
+                    //blockClient.DistributeVideoFrame(image.Pixels);
                 }
             }
         }
@@ -133,8 +133,8 @@ public class VideoStreamer : MonoBehaviour {
             int width = image.Width;
             int height = image.Height;
 
-            width = 240;
-            height = 120;
+            //width = 240;
+            //height = 120;
 
             InitializeWebcamTexture(width, height, webcamTextureFormat);
             initialized = true;

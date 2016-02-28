@@ -16,6 +16,7 @@ public class CameraCapture : MonoBehaviour
     private Image.PIXEL_FORMAT m_PixelFormat = Image.PIXEL_FORMAT.GRAYSCALE;
     private bool m_RegisteredFormat = false;
 
+
     // Use this for initialization
     void Start ()
     {
@@ -25,6 +26,14 @@ public class CameraCapture : MonoBehaviour
             qcarBehaviour.RegisterTrackablesUpdatedCallback(OnTrackablesUpdated);
             streamText.text = "ready to go";
         }
+        /*
+        CameraDevice cam = CameraDevice.Instance;
+        cam.Stop();
+        cam.Deinit();
+        cam.Init(CameraDevice.CameraDirection.CAMERA_BACK);
+        CameraDevice.Instance.SelectVideoMode(CameraDevice.CameraDeviceMode.MODE_OPTIMIZE_SPEED);
+        cam.Start();
+        */
     }
 
 
@@ -45,13 +54,13 @@ public class CameraCapture : MonoBehaviour
         }
 
 
-        if (client.connected && timer < 0)
+        if (client.connected /*&& timer < 0*/)
         {
             CameraDevice cam = CameraDevice.Instance;
             Image image = cam.GetCameraImage(m_PixelFormat);
             if (image == null)
             {
-                errorText.text = m_PixelFormat + " image is not available yet";
+                errorText.text = m_PixelFormat + " image is not available yet; client =" + client.connected;
             }
             else
             {
@@ -66,7 +75,7 @@ public class CameraCapture : MonoBehaviour
                 client.DistributeVideoFrame(image.Pixels);
                 streamText.text = s;
             }
-            timer = 1.0f;
+            timer = 0.33f;
         }
 
         timer -= Time.deltaTime;

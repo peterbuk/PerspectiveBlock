@@ -15,7 +15,7 @@ public class ReceiverServer : MonoBehaviour
         public Socket client = ReceiverServer.server.Client;
     }
 
-    bool debug = true;
+    bool debug = false;
 
     public bool Receiving { get; set; }
 
@@ -37,9 +37,10 @@ public class ReceiverServer : MonoBehaviour
     public Text debugText;
     public InputField inputField;
     public GameObject ARCamera;
-    //public VideoViewer viewer;
 
+    private VideoViewer viewer;
     private ViewLocation location;
+
 
     byte[] data = null;         // byte array to store message
     int currentMessage = -1;    // the current msg we are working on
@@ -51,8 +52,9 @@ public class ReceiverServer : MonoBehaviour
 
 
     // Use this for initialization
-    void Start ()
+    void Start()
     {
+        viewer = (VideoViewer)this.gameObject.GetComponent<VideoViewer>();
         server = new UdpClient(port);
 
         /* MULTICASTING (NOT WORKING)
@@ -73,8 +75,10 @@ public class ReceiverServer : MonoBehaviour
 
         // start receiving data
         this.ReceiveData();
+        //this.ReceiveDataBackup();
     }
-	
+
+
 
     public void ReceiveData()
     {
@@ -91,8 +95,6 @@ public class ReceiverServer : MonoBehaviour
 
     private void ReceiveCallback(IAsyncResult ar)
     {
-        Debug.Log("packet get");
-        
         if (!this.Receiving)
         {
             return;
@@ -104,7 +106,8 @@ public class ReceiverServer : MonoBehaviour
 
         int bytesRead = client.EndReceive(ar);
 
-        try {
+        try
+        {
             if (bytesRead > 0)
             {
                 // read packet header
@@ -161,15 +164,18 @@ public class ReceiverServer : MonoBehaviour
                 // check if received entire message
                 if (receivedBytes == length)
                 {
-                    //if (debug)
-                    debugText.text = "MSG#" + messageNum + " COMPLETE. Length = " + receivedBytes + "\n";
+                    if (debug)
+                    {
+                        debugText.text += "MSG#" + messageNum + " COMPLETE. Length = " + receivedBytes + "\n";
+                        Debug.Log("finished #" + messageNum + " Length=" + receivedBytes);
+                    }
 
                     messageCompleted = true;
                     successCount++;
 
                     DrawImage(messageType);
 
-                    msgState = new MessageContainer();
+                    //msgState = new MessageContainer();
                     client.BeginReceive(msgState.buffer, 0, PACKET_SIZE, SocketFlags.None,
                              new AsyncCallback(ReceiveCallback), msgState);
 
@@ -180,7 +186,7 @@ public class ReceiverServer : MonoBehaviour
                         debugText.text = "NOTDONE #" + currentMessage + " : " + receivedBytes + "/" + length + "\n";
 
                     // create new container
-                    msgState = new MessageContainer();
+                    // msgState = new MessageContainer();
                     client.BeginReceive(msgState.buffer, 0, PACKET_SIZE, SocketFlags.None,
                              new AsyncCallback(ReceiveCallback), msgState);
                 }
@@ -188,31 +194,62 @@ public class ReceiverServer : MonoBehaviour
         }
         catch (Exception e)
         {
-            debugText.text = "WTF IS WRONG WITH THIS" + e.ToString();
+            Debug.Log("something went wrong " + e);
         }
-        debugText.text = "I should not be here";
     }
 
 
     private void DrawImage(byte messageType)
     {
+
         if (messageType == 1)
         {
-            Debug.Log("FUCK");
+            MainThread.Call(PrintMessageReceived);
+            //debugText.text += data.Length + "\n";
+            //Debug.Log(ByteToString(data));
         }
+        else if (messageType == 2)
+        {
+            MainThread.Call(PrintMessageReceived);
+            MainThread.Call(LoadFrame);
+            //Debug.Log("IMAGE");
+        }
+    }
+
+    void PrintMessageReceived()
+    {
+        debugText.text = "Received " + data.Length + "bytes\n";
+    }
+
+    void LoadFrame()
+    {
+        debugText.text = data.Length + "\n";
+        viewer.LoadFrame(data);
+    }
+
+
+    public string ByteToString(byte[] bytes)
+    {
+        char[] chars = new char[bytes.Length / sizeof(char)];
+        System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
+        return new string(chars);
+    }
+
+    bool messageComplete = true;
+    void Update()
+    {
+        //ReceiveDataBackup();
     }
 
     public void ReceiveDataBackup()
     {
-        byte[] data = null;
+        /*byte[] data = null;
         short currentMessage = -1;
         int receivedBytes = 0;
         int packetCount = 0;
-        bool messageComplete = true;
+        bool messageComplete = true;*/
 
-        Console.WriteLine("Waiting for data...");
-
-        while (true)
+        //while (true)
         {
             IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, port);
 
@@ -221,7 +258,8 @@ public class ReceiverServer : MonoBehaviour
             // read packet header
             short messageNum = BitConverter.ToInt16(packet, 0);
             short packetNum = BitConverter.ToInt16(packet, 2);
-            int length = BitConverter.ToInt32(packet, 4);
+            byte messageType = packet[4];
+            int length = BitConverter.ToInt32(packet, 5);
 
 
             messageNum = System.Net.IPAddress.NetworkToHostOrder(messageNum);
@@ -236,16 +274,12 @@ public class ReceiverServer : MonoBehaviour
                 if (!messageComplete)
                     dropCount++;
 
-                if (debug)
-                    Console.WriteLine("NEW MSG#" + messageNum + " RECEIVED. Length = " + length);
-
                 data = new byte[length];
                 currentMessage = messageNum;
                 receivedBytes = 0;
                 packetCount = 0;
                 messageComplete = false;
             }
-
 
             // write the payload from the packet into the right position in the data
             Array.Copy(packet, PACKET_HEADER_SIZE,
@@ -256,38 +290,16 @@ public class ReceiverServer : MonoBehaviour
             receivedBytes += payloadSize;
             packetCount++;
 
-            if (debug)
-            {
-                Console.WriteLine("Received packet of length " + packet.Length);
-                Console.WriteLine("   [HEADER] #" + messageNum +
-                                        " : " + packetNum + " : " + length);
-                Console.WriteLine("Count: " + packetCount + " received: " + receivedBytes);
-            }
-
             // received entire message
             if (receivedBytes == length)
             {
-                debugText.text = "MSG#" + messageNum + " COMPLETE. Length = " + receivedBytes;
-
                 messageComplete = true;
                 successCount++;
 
-                /*Application.Current.Dispatcher.Invoke(() =>
-                {
-                    MemoryStream stream = new MemoryStream(data);
-                    stream.Seek(0, SeekOrigin.Begin);
-                    BitmapImage image = new BitmapImage();
-                    image.BeginInit();
-                    image.StreamSource = stream;
-                    image.EndInit();
-
-                    drawImage.Source = image;
-                    countLabel.Content = dropCount + " : " + successCount +
-                    " (" + (double)dropCount / (double)(successCount + dropCount) * 100 + "% dropped)";
-
-                });*/
+                DrawImage(messageType);
             }
-
         }
     }//end
+
+
 }

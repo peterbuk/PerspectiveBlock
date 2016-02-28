@@ -30,7 +30,7 @@ public class SenderClient : MonoBehaviour
     public static readonly byte BITMAP_MSG = 2;
 
     UdpClient client;
-    string hostname = "192.168.1.2";
+    string hostname = "192.168.1.3";
     int port = 12341;
     short messageNum;
 
@@ -55,12 +55,13 @@ public class SenderClient : MonoBehaviour
         client = new UdpClient();
         messageNum = 0;
         ipAddress.text = hostname;
-
+        //ipAddress.text = "127.0.0.1";
         /* MULTICAST (NOT WORKING)
         multicastAddress = IPAddress.Parse("239.0.0.222");
         client.JoinMulticastGroup(multicastAddress);
         remoteEP = new IPEndPoint(multicastAddress, port);
         */
+        Connect();
     }
 
     // Connect to ViewServer on Connect button press
