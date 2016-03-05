@@ -3,6 +3,7 @@ using System.Collections;
 
 public class VideoViewer : MonoBehaviour {
 
+    public GameObject imagePanel;
     public UnityEngine.UI.Image displayImage;
 
     private Texture2D planeTexture;
@@ -53,4 +54,5 @@ public class VideoViewer : MonoBehaviour {
 
         initialized = true;
     }
+
 }

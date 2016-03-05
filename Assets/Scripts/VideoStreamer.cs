@@ -10,8 +10,13 @@ using Vuforia;
 
 public class VideoStreamer : MonoBehaviour {
 
+    public GameObject ARCamera;
+    public GameObject target;
+    public GameObject spotlight;
+
     public Text debugText;
-    public SenderClient blockClient;
+    public Text cameraText;
+    public SenderClient sender;
 
     [Header("Server Only")]
     public string textureBufferCameraName = "TextureBufferCamera";
@@ -32,16 +37,59 @@ public class VideoStreamer : MonoBehaviour {
     private float nextFrame = 0.0f;
 
     // Use this for initialization
-    void Start () {
-
+    void Start ()
+    {
+        spotlight = Instantiate(spotlight);
+        spotlight.SetActive(true);
         VuforiaBehaviour qcarBehaviour = (VuforiaBehaviour)FindObjectOfType(typeof(VuforiaBehaviour));
         if (qcarBehaviour)
         {
             qcarBehaviour.RegisterTrackablesUpdatedCallback(OnTrackablesUpdated);
         }
-	
 	}
 
+
+    /*
+    *    Stream AR Camera location data
+    */
+    void Update()
+    {
+        Vector3 cameraLocation = ARCamera.transform.position;
+        Vector3 targetLocation = target.transform.position;
+        Quaternion cameraRotation = ARCamera.transform.rotation;
+        float distance = Vector3.Distance(targetLocation, cameraLocation);
+
+        cameraText.text = "Camera Location: " + cameraLocation.ToString() + "\n" +
+            "Camera Rotation: " + cameraRotation.ToString() +
+            "\nDistance from target: " + distance +
+            "\nTarget location: " + targetLocation.ToString();
+
+
+        // send location updates
+        if (sender.Connected && sender.LocationOn)
+        {
+            // location update
+            string msg = "LOC|" +
+                          cameraLocation.x + "|" +
+                          cameraLocation.y + "|" +
+                          cameraLocation.z + "|" +
+                          cameraRotation.x + "|" +
+                          cameraRotation.y + "|" +
+                          cameraRotation.z + "|" +
+                          cameraRotation.w;
+
+            sender.SendTextMessage(msg);
+        }
+
+        // spotlight
+        spotlight.SetActive(true);
+        spotlight.transform.position = this.transform.position;
+        spotlight.transform.rotation = this.transform.rotation;
+    }
+
+    /*
+    *   Stream Video data
+    */
     public void OnTrackablesUpdated()
     {
         if (!m_RegisteredFormat)
@@ -89,12 +137,11 @@ public class VideoStreamer : MonoBehaviour {
         //need to intialize after we get an image, run once
         if (initialized == false)
         {
-
             InitializeTextureCameraCapture();
             return;
         }
 
-        if (blockClient.connected)
+        if (sender.Connected && sender.FrameOn)
         {
             if (Time.time > nextFrame)
             {
@@ -108,9 +155,8 @@ public class VideoStreamer : MonoBehaviour {
                 }
                 else
                 {
-                    
                     planeTexture.LoadRawTextureData(image.Pixels);
-                    blockClient.DistributeVideoFrame(planeTexture.EncodeToJPG(clientCompressQuality));
+                    sender.SendVideoFrame(planeTexture.EncodeToJPG(clientCompressQuality));
                     
                     //blockClient.DistributeVideoFrame(image.Pixels);
                 }
@@ -162,8 +208,5 @@ public class VideoStreamer : MonoBehaviour {
 
 
 
-    // Update is called once per frame
-    void Update () {
-	
-	}
+
 }

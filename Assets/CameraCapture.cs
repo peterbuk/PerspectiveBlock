@@ -54,13 +54,13 @@ public class CameraCapture : MonoBehaviour
         }
 
 
-        if (client.connected /*&& timer < 0*/)
+        if (client.Connected /*&& timer < 0*/)
         {
             CameraDevice cam = CameraDevice.Instance;
             Image image = cam.GetCameraImage(m_PixelFormat);
             if (image == null)
             {
-                errorText.text = m_PixelFormat + " image is not available yet; client =" + client.connected;
+                errorText.text = m_PixelFormat + " image is not available yet; client =" + client.Connected;
             }
             else
             {
@@ -72,7 +72,7 @@ public class CameraCapture : MonoBehaviour
 
                 byte[] data = image.Pixels;
 
-                client.DistributeVideoFrame(image.Pixels);
+                client.SendVideoFrame(image.Pixels);
                 streamText.text = s;
             }
             timer = 0.33f;

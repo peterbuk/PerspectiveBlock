@@ -27,19 +27,15 @@ public class ReceiverServer : MonoBehaviour
     int port = 12341;
     bool connected = false;
 
-    // multicast
-    IPAddress multicastAddress;
-    IPEndPoint localEP;
-
-    /*Image drawImage;
-    Label countLabel;
-    MainWindow gui;*/
     public Text debugText;
-    public InputField inputField;
     public GameObject ARCamera;
 
     private VideoViewer viewer;
-    private ViewLocation location;
+    private ViewLocation floater;
+
+    private int mode;
+    static readonly int MODE_AUGMENTED = 0;
+    static readonly int MODE_VIDEO = 1;
 
 
     byte[] data = null;         // byte array to store message
@@ -50,34 +46,19 @@ public class ReceiverServer : MonoBehaviour
     int dropCount = -1;
     int successCount = 0;
 
-
     // Use this for initialization
     void Start()
     {
         viewer = (VideoViewer)this.gameObject.GetComponent<VideoViewer>();
+        floater = (ViewLocation)ARCamera.GetComponent<ViewLocation>();
         server = new UdpClient(port);
 
-        /* MULTICASTING (NOT WORKING)
-        server = new UdpClient();
-        localEP = new IPEndPoint(IPAddress.Any, port);
-
-        server.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-        server.ExclusiveAddressUse = false;
-
-        server.Client.Bind(localEP);
-        multicastAddress = IPAddress.Parse("239.0.0.222");
-        //server.JoinMulticastGroup(multicastAddress);  not working?
-        server.JoinMulticastGroup(multicastAddress, localEP.Address);
-        */
-
         server.Client.ReceiveBufferSize = 81920;
-        //location = ARCamera.GetComponent<ViewLocation>();
+        mode = MODE_AUGMENTED;
 
         // start receiving data
         this.ReceiveData();
-        //this.ReceiveDataBackup();
     }
-
 
 
     public void ReceiveData()
@@ -90,6 +71,7 @@ public class ReceiverServer : MonoBehaviour
 
         server.Client.BeginReceive(msgState.buffer, 0, PACKET_SIZE, SocketFlags.None,
                         new AsyncCallback(ReceiveCallback), msgState);
+
     }
 
 
@@ -103,7 +85,7 @@ public class ReceiverServer : MonoBehaviour
         // retrieve the object
         MessageContainer msgState = (MessageContainer)ar.AsyncState;
         Socket client = msgState.client;
-
+        
         int bytesRead = client.EndReceive(ar);
 
         try
@@ -129,6 +111,8 @@ public class ReceiverServer : MonoBehaviour
                     if (!messageCompleted)
                         dropCount++;
 
+                    string err = "dropped msg";
+                    MainThread.Call(PrintDebug, err);
                     if (debug)
                         debugText.text += "NEW MSG#" + messageNum + ":" + packetNum + " RECEIVED. Discarding MSG#" + currentMessage;
 
@@ -173,7 +157,7 @@ public class ReceiverServer : MonoBehaviour
                     messageCompleted = true;
                     successCount++;
 
-                    DrawImage(messageType);
+                    HandleMessage(messageType);
 
                     //msgState = new MessageContainer();
                     client.BeginReceive(msgState.buffer, 0, PACKET_SIZE, SocketFlags.None,
@@ -194,112 +178,110 @@ public class ReceiverServer : MonoBehaviour
         }
         catch (Exception e)
         {
+            MainThread.Call(PrintDebug, e);
             Debug.Log("something went wrong " + e);
         }
     }
 
 
-    private void DrawImage(byte messageType)
+    private void HandleMessage(byte messageType)
     {
 
         if (messageType == 1)
         {
-            MainThread.Call(PrintMessageReceived);
-            //debugText.text += data.Length + "\n";
-            //Debug.Log(ByteToString(data));
+            MainThread.Call(PrintMsgLength);
+            string msg = ByteToString(data);
+
+            if (msg.Contains("LOC"))
+                MainThread.Call(LocationUpdate, msg);
         }
         else if (messageType == 2)
         {
-            MainThread.Call(PrintMessageReceived);
-            MainThread.Call(LoadFrame);
-            //Debug.Log("IMAGE");
+            MainThread.Call(PrintMsgLength);
+            MainThread.Call(LoadImageFrame);
         }
     }
 
-    void PrintMessageReceived()
+    /*
+    *   Toggle between Augmented Mode and Video Mode
+    */
+    private void ChangeMode(int newMode)
+    {
+        try
+        {
+
+            if (newMode == MODE_VIDEO)
+            {
+                viewer.imagePanel.SetActive(true);
+                floater.floaterPointer.SetActive(false);
+                mode = MODE_VIDEO;
+            }
+            else if (newMode == MODE_AUGMENTED)
+            {
+                viewer.imagePanel.SetActive(false);
+                floater.floaterPointer.SetActive(true);
+                mode = MODE_AUGMENTED;
+            }
+        }
+        catch (Exception e)
+        {
+            MainThread.Call(PrintDebug, e);
+        }
+    }
+
+    #region MAINTHREAD FUNCTIONS
+    //DEBUG: print out length of message received
+    //MAIN THREAD FUNCTION, ONLY CALL FROM MAIN THREAD
+    void PrintMsgLength()
     {
         debugText.text = "Received " + data.Length + "bytes\n";
     }
 
-    void LoadFrame()
+    //MAIN THREAD FUNCTION, ONLY CALL FROM MAIN THREAD
+    void PrintDebug(System.Object msg)
     {
-        debugText.text = data.Length + "\n";
-        viewer.LoadFrame(data);
+        debugText.text += msg.ToString() + "\n";
+    }
+
+    // parse through a location update for floater
+    //MAIN THREAD FUNCTION, ONLY CALL FROM MAIN THREAD
+    void LocationUpdate(System.Object msg)
+    {
+        if (mode == MODE_VIDEO)
+            ChangeMode(MODE_AUGMENTED);
+
+        string[] values = msg.ToString().Split('|');
+        Vector3 position = new Vector3(float.Parse(values[1]),
+                                        float.Parse(values[2]),
+                                        float.Parse(values[3]));
+
+        Quaternion rotation = new Quaternion(float.Parse(values[4]),
+                                            float.Parse(values[5]),
+                                            float.Parse(values[6]),
+                                            float.Parse(values[7]));
+
+        floater.UpdatePointer(position, rotation);
     }
 
 
+    // load a video frame data
+    //MAIN THREAD FUNCTION, ONLY CALL FROM MAIN THREAD
+    void LoadImageFrame()
+    {
+        if (mode == MODE_AUGMENTED)
+            ChangeMode(MODE_VIDEO);
+
+        debugText.text = data.Length + "\n";
+        viewer.LoadFrame(data);
+    }
+    #endregion
+
+    // helper function
     public string ByteToString(byte[] bytes)
     {
         char[] chars = new char[bytes.Length / sizeof(char)];
         System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
         return new string(chars);
     }
-
-    bool messageComplete = true;
-    void Update()
-    {
-        //ReceiveDataBackup();
-    }
-
-    public void ReceiveDataBackup()
-    {
-        /*byte[] data = null;
-        short currentMessage = -1;
-        int receivedBytes = 0;
-        int packetCount = 0;
-        bool messageComplete = true;*/
-
-        //while (true)
-        {
-            IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, port);
-
-            byte[] packet = server.Receive(ref remoteEP);
-
-            // read packet header
-            short messageNum = BitConverter.ToInt16(packet, 0);
-            short packetNum = BitConverter.ToInt16(packet, 2);
-            byte messageType = packet[4];
-            int length = BitConverter.ToInt32(packet, 5);
-
-
-            messageNum = System.Net.IPAddress.NetworkToHostOrder(messageNum);
-            packetNum = System.Net.IPAddress.NetworkToHostOrder(packetNum);
-            length = System.Net.IPAddress.NetworkToHostOrder(length);
-
-            int payloadSize = packet.Length - PACKET_HEADER_SIZE;
-
-            // received a new message, start over
-            if (messageNum != currentMessage)
-            {
-                if (!messageComplete)
-                    dropCount++;
-
-                data = new byte[length];
-                currentMessage = messageNum;
-                receivedBytes = 0;
-                packetCount = 0;
-                messageComplete = false;
-            }
-
-            // write the payload from the packet into the right position in the data
-            Array.Copy(packet, PACKET_HEADER_SIZE,
-                    data, packetNum * PAYLOAD_SIZE_FULL,
-                    payloadSize);
-
-            // count the # of bytes we got
-            receivedBytes += payloadSize;
-            packetCount++;
-
-            // received entire message
-            if (receivedBytes == length)
-            {
-                messageComplete = true;
-                successCount++;
-
-                DrawImage(messageType);
-            }
-        }
-    }//end
-
 
 }

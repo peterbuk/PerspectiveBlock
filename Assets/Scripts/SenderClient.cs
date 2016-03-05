@@ -25,26 +25,25 @@ public class SenderClient : MonoBehaviour
     static readonly int PACKET_SIZE = 1024;  // size of a single packet to send
     static readonly int PACKET_HEADER_SIZE = 9;
     static readonly int PAYLOAD_SIZE = PACKET_SIZE - PACKET_HEADER_SIZE;
+    
+    public bool FrameOn { get; set; }
+    public bool LocationOn { get; set; }
+    public bool Connected { get; set; }
 
     public static readonly byte STRING_MSG = 1;
-    public static readonly byte BITMAP_MSG = 2;
+    public static readonly byte FRAME_MSG = 2;
 
     UdpClient client;
-    string hostname = "192.168.1.3";
+    public string partnerViewerHostname = "192.168.1.3";    // target of stream
+
     int port = 12341;
     short messageNum;
 
-    /* multicast
-    IPAddress multicastAddress;
-    IPEndPoint remoteEP;
-    */
-
-    float timer = 1.0f;
-    public bool connected = false;
     public Text networkText;
     public Text cameraText;
     public Text errorText;
-    public InputField ipAddress;
+    public InputField partnerViewIP;
+
 
     public GameObject target;
     public GameObject ARCamera;
@@ -52,69 +51,52 @@ public class SenderClient : MonoBehaviour
     // Use this for initialization
     void Start ()
     {
+        this.FrameOn = false;
+        this.LocationOn = true;
+
         client = new UdpClient();
         messageNum = 0;
-        ipAddress.text = hostname;
-        //ipAddress.text = "127.0.0.1";
-        /* MULTICAST (NOT WORKING)
-        multicastAddress = IPAddress.Parse("239.0.0.222");
-        client.JoinMulticastGroup(multicastAddress);
-        remoteEP = new IPEndPoint(multicastAddress, port);
-        */
-        Connect();
+
+        partnerViewIP.text = partnerViewerHostname;
     }
 
-    // Connect to ViewServer on Connect button press
+    // Connect to Partner Viewer on Connect button press to stream data
     public void Connect()
     {
-        networkText.text = "Connecting to" + ipAddress.text;
-        client.Connect(ipAddress.text, port);
-        connected = true;
+        networkText.text = "Connecting to" + partnerViewIP.text;
+        errorText.text = "no errors :)";
+        client.Connect(partnerViewIP.text, port);
+        this.Connected = true;
     }
 
-    
-    /*
-    Send location updates to server constantly
-    TODO: move this to more appropriate class
-    */
-    void Update ()
+
+    public void SendTextMessage(string msg)
     {
-        Vector3 cameraLocation = ARCamera.transform.position;
-        Vector3 targetLocation = target.transform.position;
-        Quaternion cameraRotation = ARCamera.transform.rotation;
-        float distance = Vector3.Distance(targetLocation, cameraLocation);
-
-        cameraText.text = "Camera Location: " + cameraLocation.ToString() + "\n" +
-            "Camera Rotation: " + cameraRotation.ToString() +
-            "\nDistance from target: " + distance +
-            "\nTarget location: " + targetLocation.ToString();
-        
-        
-        // send location updates
-        if (connected)
-        {
-            timer -= Time.deltaTime;
-            //if (timer < 0)
-
-            string msg =  cameraLocation.x + "|" +
-                          cameraLocation.y + "|" +
-                          cameraLocation.z + "|" +
-                          cameraRotation.x + "|" +
-                          cameraRotation.y + "|" +
-                          cameraRotation.z + "|" +
-                          cameraRotation.w;
-
-            //SendData(StringToBytes(msg), STRING_MSG);
-            //networkText.text = "sent: " + msg.Length;
-
-            timer = 1.0f;
-        }
+        byte[] msgData = StringToBytes(msg);
+        networkText.text = "msgsize: " + msgData.Length;
+        SendData(msgData, STRING_MSG);
     }
-
-    public void DistributeVideoFrame(byte[] frame)
+    
+    public void SendVideoFrame(byte[] frame)
     {
         networkText.text = "framesize: " + frame.Length;
-        SendData(frame, BITMAP_MSG);
+        SendData(frame, FRAME_MSG);
+    }
+    
+
+    // toggle between streaming video and location
+    public void ToggleStream()
+    {
+        if (this.FrameOn)
+        {
+            this.FrameOn = false;
+            this.LocationOn = true;
+        }
+        else
+        {
+            this.FrameOn = true;
+            this.LocationOn = false;
+        }
     }
 
 
@@ -181,14 +163,6 @@ public class SenderClient : MonoBehaviour
             {
                 client.Client.BeginSend(packet, 0, packet.Length, SocketFlags.None,
                                new AsyncCallback(SendCallback), client.Client);
-
-                /* MULTICAST (NOT WORKING)
-                client.Client.BeginSendTo(packet, 0, packet.Length, SocketFlags.Broadcast, remoteEP,
-                                     new AsyncCallback(SendCallback), client.Client);
-
-                //non-async
-                //client.Send(packet, packet.Length, remoteEP);
-                */
 
                 bytesLeft -= packet.Length - PACKET_HEADER_SIZE;
 
