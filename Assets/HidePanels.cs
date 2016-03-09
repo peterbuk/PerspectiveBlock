@@ -18,18 +18,36 @@ public class HidePanels : MonoBehaviour {
 	
 	}
 
-    public void HideDebug()
+    public void HideNetwork()
     {
         if (active)
         {
-            cameraPanel.SetActive(false);
             networkPanel.SetActive(false);
             active = false;
         }
         else
         {
-            cameraPanel.SetActive(true);
             networkPanel.SetActive(true);
+            active = true;
+        }
+    }
+
+    public void HideDebug()
+    {
+        if (active)
+        {
+            if (cameraPanel != null)
+                cameraPanel.SetActive(false);
+            if (networkPanel != null)
+                networkPanel.SetActive(false);
+            active = false;
+        }
+        else
+        {
+            if (cameraPanel != null)
+                cameraPanel.SetActive(true);
+            if (networkPanel != null)
+                networkPanel.SetActive(true);
             active = true;
         }
 

@@ -38,8 +38,8 @@ public class ViewLocation : MonoBehaviour {
         floaterPointer.SetActive(true);
         floaterPointer.transform.position = position;
         floaterPointer.transform.rotation = rotation;
-        //floaterPointer.transform.Rotate(0, 90, 270);
-        floaterPointer.transform.Rotate(x, y, z);
+        floaterPointer.transform.Rotate(0, 90, -90);
+        //floaterPointer.transform.Rotate(x, y, z);
 
         spotlight.SetActive(true);
         spotlight.transform.position = position;

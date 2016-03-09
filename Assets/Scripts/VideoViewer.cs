@@ -7,8 +7,8 @@ public class VideoViewer : MonoBehaviour {
     public UnityEngine.UI.Image displayImage;
 
     private Texture2D planeTexture;
-    private int texWidth = 1280;
-    private int texHeight = 720;
+    private int texWidth = 480;
+    private int texHeight = 270;
 
     bool initialized = false;
 
@@ -36,7 +36,7 @@ public class VideoViewer : MonoBehaviour {
 
     void InitializeTexture()
     {
-        planeTexture = new Texture2D(texWidth, texHeight, TextureFormat.RGB565, false);
+        planeTexture = new Texture2D(texWidth, texHeight, TextureFormat.RGB24, false);
 
         for (int i = 0; i < texHeight; i++)
         {

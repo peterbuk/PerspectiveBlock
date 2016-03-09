@@ -34,7 +34,7 @@ public class SenderClient : MonoBehaviour
     public static readonly byte FRAME_MSG = 2;
 
     UdpClient client;
-    public string partnerViewerHostname = "192.168.1.3";    // target of stream
+    public string partnerViewerHostname = "192.168.1.3"; //"192.168.1.3";    // target of stream
 
     int port = 12341;
     short messageNum;

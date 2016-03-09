@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 using Vuforia;
+using Assets.Scripts;
 
 /*
 *   Caputres a video frame from the AR Camera and gives to client to send.
@@ -36,9 +37,13 @@ public class VideoStreamer : MonoBehaviour {
     private int texHeight = 480;
     private float nextFrame = 0.0f;
 
+    Texture2D tex;
+
     // Use this for initialization
     void Start ()
     {
+        tex = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
+
         spotlight = Instantiate(spotlight);
         spotlight.SetActive(true);
         VuforiaBehaviour qcarBehaviour = (VuforiaBehaviour)FindObjectOfType(typeof(VuforiaBehaviour));
@@ -96,7 +101,10 @@ public class VideoStreamer : MonoBehaviour {
         {
             bool supported = false;
             m_PixelFormat = Vuforia.Image.PIXEL_FORMAT.RGB565;
-            webcamTextureFormat = TextureFormat.RGB565;
+            webcamTextureFormat = TextureFormat.RGB24;
+
+
+            
             //Try all the modes yo. Not all devices will support all the pixel formats, will try color until greyscale
             while (supported == false)
             {
@@ -130,6 +138,7 @@ public class VideoStreamer : MonoBehaviour {
                     }
                 }
             }
+            
             m_RegisteredFormat = true;
             debugText.text += "Image format registered as: " + m_PixelFormat.ToString();
         }
@@ -155,10 +164,39 @@ public class VideoStreamer : MonoBehaviour {
                 }
                 else
                 {
-                    planeTexture.LoadRawTextureData(image.Pixels);
-                    sender.SendVideoFrame(planeTexture.EncodeToJPG(clientCompressQuality));
-                    
-                    //blockClient.DistributeVideoFrame(image.Pixels);
+                    try
+                    {
+
+                        tex.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0, false);
+                        tex.Apply();
+                        //TextureScale.Bilinear(tex, Screen.width/2, Screen.height/2);
+                        Texture2D newTex = TextureScale.ScaleTexture(tex, Screen.width / 4, Screen.height /4);
+                        byte[] bytes = newTex.EncodeToJPG(clientCompressQuality);
+                        sender.SendVideoFrame(bytes);
+                        debugText.text = "image (" + newTex.width + "," + newTex.height + ")";
+
+                        //Texture2D tex = new Texture2D(image.Width, image.Height, TextureFormat.RGB565, false);
+                       // tex.LoadRawTextureData(image.Pixels);
+                        //sender.SendVideoFrame(tex.EncodeToJPG(clientCompressQuality));
+
+                        //image.CopyToTexture(planeTexture);
+                        //planeTexture.ReadPixels(new Rect(0, 0, image.Width, image.Height), 0, 0);
+                        //planeTexture.Apply();
+                        //byte[] bytes = planeTexture.EncodeToPNG();
+                        //sender.SendVideoFrame(bytes);
+
+
+
+                        // workking
+                        //planeTexture.LoadRawTextureData(image.Pixels);
+                        //sender.SendVideoFrame(planeTexture.EncodeToJPG(clientCompressQuality));
+
+
+                    }
+                    catch (System.Exception e)
+                    {
+                        debugText.text = e.ToString();
+                    }
                 }
             }
         }
