@@ -3,8 +3,9 @@ using System.Collections;
 
 public class VideoViewer : MonoBehaviour {
 
-    public GameObject imagePanel;
-    public UnityEngine.UI.Image displayImage;
+    public GameObject imagePanel; // used elsewhere
+    public UnityEngine.UI.Image displayLeft;
+    public UnityEngine.UI.Image displayRight;
 
     private Texture2D planeTexture;
     private int texWidth = 480;
@@ -46,10 +47,15 @@ public class VideoViewer : MonoBehaviour {
             }
         }
 
-        if (displayImage != null)
+        if (displayLeft != null)
         {
-            displayImage.sprite = Sprite.Create(planeTexture, new Rect(0, 0, texWidth, texHeight), new Vector2(0.5f, 0.5f));
+            displayLeft.sprite = Sprite.Create(planeTexture, new Rect(0, 0, texWidth, texHeight), new Vector2(0.5f, 0.5f));
         }
+        if (displayRight != null)
+        {
+            displayRight.sprite = Sprite.Create(planeTexture, new Rect(0, 0, texWidth, texHeight), new Vector2(0.5f, 0.5f));
+        }
+
         planeTexture.Apply();
 
         initialized = true;
