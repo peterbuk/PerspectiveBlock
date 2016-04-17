@@ -1,0 +1,172 @@
+fileFormatVersion: 2
+guid: f27870a3fcad66047b21ae38aca6974d
+timeCreated: 1459206741
+licenseType: Free
+ModelImporter:
+  serializedVersion: 18
+  fileIDToRecycleName:
+    100000: BALK_X
+    100002: BODY
+    100004: column3
+    100006: Cone01
+    100008: Cone02
+    100010: DOOR
+    100012: DOOR_ANAGL
+    100014: DOOR_GLASS
+    100016: DOOR_WIN_G
+    100018: FASA
+    100020: GLASS_WIN
+    100022: //RootNode
+    100024: KAFASIA
+    100026: KAGELOPORT
+    100028: KOLONES
+    100030: KOYPASTH
+    100032: MPOYKALES
+    100034: ROOF
+    100036: STAIRS_vil
+    100038: VER_ROUND_
+    100040: WIN_INKAF
+    100042: WINDOW_PLE
+    400000: BALK_X
+    400002: BODY
+    400004: column3
+    400006: Cone01
+    400008: Cone02
+    400010: DOOR
+    400012: DOOR_ANAGL
+    400014: DOOR_GLASS
+    400016: DOOR_WIN_G
+    400018: FASA
+    400020: GLASS_WIN
+    400022: //RootNode
+    400024: KAFASIA
+    400026: KAGELOPORT
+    400028: KOLONES
+    400030: KOYPASTH
+    400032: MPOYKALES
+    400034: ROOF
+    400036: STAIRS_vil
+    400038: VER_ROUND_
+    400040: WIN_INKAF
+    400042: WINDOW_PLE
+    2300000: BALK_X
+    2300002: BODY
+    2300004: column3
+    2300006: Cone01
+    2300008: Cone02
+    2300010: DOOR
+    2300012: DOOR_ANAGL
+    2300014: DOOR_GLASS
+    2300016: DOOR_WIN_G
+    2300018: FASA
+    2300020: GLASS_WIN
+    2300022: KAFASIA
+    2300024: KAGELOPORT
+    2300026: KOLONES
+    2300028: KOYPASTH
+    2300030: MPOYKALES
+    2300032: ROOF
+    2300034: STAIRS_vil
+    2300036: VER_ROUND_
+    2300038: WIN_INKAF
+    2300040: WINDOW_PLE
+    3300000: BALK_X
+    3300002: BODY
+    3300004: column3
+    3300006: Cone01
+    3300008: Cone02
+    3300010: DOOR
+    3300012: DOOR_ANAGL
+    3300014: DOOR_GLASS
+    3300016: DOOR_WIN_G
+    3300018: FASA
+    3300020: GLASS_WIN
+    3300022: KAFASIA
+    3300024: KAGELOPORT
+    3300026: KOLONES
+    3300028: KOYPASTH
+    3300030: MPOYKALES
+    3300032: ROOF
+    3300034: STAIRS_vil
+    3300036: VER_ROUND_
+    3300038: WIN_INKAF
+    3300040: WINDOW_PLE
+    4300000: BALK_X
+    4300002: BODY
+    4300004: Cone01
+    4300006: Cone02
+    4300008: DOOR
+    4300010: DOOR_ANAGL
+    4300012: DOOR_GLASS
+    4300014: DOOR_WIN_G
+    4300016: FASA
+    4300018: GLASS_WIN
+    4300020: KAFASIA
+    4300022: KAGELOPORT
+    4300024: KOLONES
+    4300026: KOYPASTH
+    4300028: MPOYKALES
+    4300030: ROOF
+    4300032: STAIRS_vil
+    4300034: VER_ROUND_
+    4300036: WIN_INKAF
+    4300038: WINDOW_PLE
+    4300040: column3
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationCompression: 1
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    splitTangentsAcrossUV: 1
+    normalImportMode: 0
+    tangentImportMode: 1
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
+    feetSpacing: 0
+    rootMotionBoneName: 
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -6,7 +6,7 @@ public class HidePanels : MonoBehaviour {
     public GameObject cameraPanel;
     public GameObject networkPanel;
 
-    bool active = true;
+    bool active = false;
 
 	// Use this for initialization
 	void Start () {

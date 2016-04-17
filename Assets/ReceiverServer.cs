@@ -29,6 +29,8 @@ public class ReceiverServer : MonoBehaviour
 
     public Text debugText;
     public GameObject ARCamera;
+    public GameObject targetA;
+    public GameObject targetB;
 
     private VideoViewer viewer;
     private ViewLocation floater;
@@ -64,7 +66,9 @@ public class ReceiverServer : MonoBehaviour
     public void ReceiveData()
     {
         this.Receiving = true;
-        debugText.text = "Ready to receive data.";
+
+        if (debugText)
+            debugText.text = "Ready to receive data.";
         connected = true;
 
         MessageContainer msgState = new MessageContainer();
@@ -184,9 +188,9 @@ public class ReceiverServer : MonoBehaviour
     }
 
 
+    // decide what to do with message
     private void HandleMessage(byte messageType)
     {
-
         if (messageType == 1)
         {
             MainThread.Call(PrintMsgLength);
@@ -194,6 +198,10 @@ public class ReceiverServer : MonoBehaviour
 
             if (msg.Contains("LOC"))
                 MainThread.Call(LocationUpdate, msg);
+
+            if (msg.Contains("SWAP"))
+                MainThread.Call(SwapModel, msg);
+
         }
         else if (messageType == 2)
         {
@@ -234,13 +242,15 @@ public class ReceiverServer : MonoBehaviour
     //MAIN THREAD FUNCTION, ONLY CALL FROM MAIN THREAD
     void PrintMsgLength()
     {
-        debugText.text = "Received " + data.Length + "bytes\n";
+        if (debugText)
+            debugText.text = "Received " + data.Length + "bytes\n";
     }
 
     //MAIN THREAD FUNCTION, ONLY CALL FROM MAIN THREAD
     void PrintDebug(System.Object msg)
     {
-        debugText.text += msg.ToString() + "\n";
+        if (debugText)
+            debugText.text += msg.ToString() + "\n";
     }
 
     // parse through a location update for floater
@@ -271,12 +281,49 @@ public class ReceiverServer : MonoBehaviour
         if (mode == MODE_AUGMENTED)
             ChangeMode(MODE_VIDEO);
 
-        debugText.text = data.Length + "\n";
+        if (debugText)
+            debugText.text = data.Length + "\n";
         viewer.LoadFrame(data);
+    }
+
+
+    private bool aON = true;
+    // swap the two house models
+    //MAIN THREAD FUNCTION, ONLY CALL FROM MAIN THREAD
+    void SwapModel(System.Object msg)
+    {
+        if (aON)
+        {
+            targetB.SetActive(true);
+            targetA.SetActive(false);
+            aON = false;
+        }
+        else
+        {
+            targetA.SetActive(true);
+            targetB.SetActive(false);
+            aON = true;
+        }
+        /*
+        // target letter is found in message[1]
+        string[] message = msg.ToString().Split(' ');
+
+        if (message[1].Equals("A"))
+        {
+            targetA.SetActive(true);
+            targetB.SetActive(false);
+        }
+
+        else if (message[1].Equals("B"))
+        {
+            targetB.SetActive(true);
+            targetA.SetActive(false);
+        }
+        //*/
     }
     #endregion
 
-    // helper function
+        // helper function
     public string ByteToString(byte[] bytes)
     {
         char[] chars = new char[bytes.Length / sizeof(char)];

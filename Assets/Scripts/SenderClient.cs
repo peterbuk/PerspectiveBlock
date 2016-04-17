@@ -57,7 +57,7 @@ public class SenderClient : MonoBehaviour
         client = new UdpClient();
         messageNum = 0;
 
-        partnerViewIP.text = partnerViewerHostname;
+        //partnerViewIP.text = partnerViewerHostname;
     }
 
     // Connect to Partner Viewer on Connect button press to stream data

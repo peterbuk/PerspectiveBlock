@@ -13,6 +13,9 @@ public class PictureInPicture : MonoBehaviour {
     private float scale_amount = 0.4F;
     private Vector3 scale;
 
+    private int xTrans = 200;
+    private int yTrans = 115;
+
     void Start()
     {
         mode = FULL_MODE;
@@ -27,8 +30,8 @@ public class PictureInPicture : MonoBehaviour {
             mode = PIP_MODE;
             Left.transform.localScale -= scale;
             Right.transform.localScale -= scale;
-            Left.transform.Translate(150, 100, 0);
-            Right.transform.Translate(150, 100, 0);
+            Left.transform.Translate(xTrans, yTrans, 0);
+            Right.transform.Translate(xTrans, yTrans, 0);
         }
         else
         {
@@ -36,8 +39,8 @@ public class PictureInPicture : MonoBehaviour {
             mode = FULL_MODE;
             Left.transform.localScale += scale;
             Right.transform.localScale += scale;
-            Left.transform.Translate(-150, -100, 0);
-            Right.transform.Translate(-150, -100, 0);
+            Left.transform.Translate(-xTrans, -yTrans, 0);
+            Right.transform.Translate(-xTrans, -yTrans, 0);
         }
     }
 }
