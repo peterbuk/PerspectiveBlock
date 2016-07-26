@@ -1,5 +1,5 @@
 # PerspectiveBlock
-Undergraduate Research Project
+Undergraduate Research Project: Sharing Perspective in Remote Collaborative AR
 
 ---
 
@@ -12,3 +12,5 @@ information such as contextual location and video feeds. By using this block, co
 able to share their perspective with each other using a variety of interaction techniques, allowing 
 for more natural communication. These interaction techniques were evaluated through an informal study 
 in order to gather feedback on their effectiveness and potential of use in a real world context.
+
+[Full Paper](https://www.dropbox.com/s/glh346ixoexwecn/perspective_block_final_paper.pdf?dl=0)
